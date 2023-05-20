@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random lightshot screenshot</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;400&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
+
+    <style>
+        *{
+            font-family: 'Urbanist', sans-serif;
+            font-size: 100%;
+            color: #f1f1f1;
+        }
+
+        .main-theme{
+            --bg: #0d0d0d;
+            --bg-card: #2f2f2f;
+            --bg-opac: rgba(0,0,0,0.3);
+            --bg-light: rgba(255,255,255,0.05);
+
+            --color-opac: rgba(255,255,255,0.9);
+
+            --btn-normal: rgba(255, 255, 255, 0.8);
+            --btn-hover: rgba(255, 255, 255, 1);
+
+            --link: cyan;
+            --link-hover: cadetblue;
+
+            --danger: rgb(255, 75, 75);
+            --danger-half: rgba(255, 75, 75, 0.5);
+            --information: rgb(36, 94, 255);
+            --ok: rgb(81, 255, 81);
+            --warn: rgb(168, 168, 97);
+
+        }
+
+
+        /* scrollbar */
+        @media all {
+            ::-webkit-scrollbar{
+                width: 9px;
+                background-color: var(--bg-opac);
+            }
+            ::-webkit-scrollbar:horizontal{
+                height: 9px;
+                background-color: var(--bg-opac);
+            }
+            ::-webkit-scrollbar-track{
+                /* box-shadow: inset 0 0 5px grey; */
+                border-radius: 10px;
+            }
+            ::-webkit-scrollbar-thumb{
+                background-color: var(--bg-opac);
+                border-radius: 10px;
+            }
+            ::-webkit-scrollbar-thumb:hover{
+                background-color: var(--bg);
+                border-radius: 10px;
+            }
+            
+        }
+
+        
+        body{
+            margin: 0;
+            padding: 0;
+            background-color: #0d0d0d;
+        }
+
+        button, input, select, option{
+            color: var(--bg);
+        }
+
+        #service{
+            background-color: var(--bg-opac);
+            border: none;
+            border-radius: 3px;
+            padding: 2px 4px;
+            color: var(--color-opac);
+        }
+        
+        .nav-cont{
+            width: calc(100% - 10px);
+            position: absolute;
+            display: flex;
+            z-index: 1000;
+            opacity: 0.2;
+            backdrop-filter: blur(15px);
+            /* opacity: 1; */
+            background-color: var(--bg-light)
+        }
+        .nav-cont:hover{
+            opacity: 1;
+        }
+        
+        #controls{
+            width: 100%;
+            bottom: 0;
+            margin: auto;
+            padding-bottom: 5px;
+            padding-top: 5px;
+            background-color: var(--bg-light);
+
+        }
+        .nav{
+            margin: auto;
+            
+        }
+        #sc-link{
+            display: block;
+            min-width: 200px;
+            max-width: 200px;
+            width: 200px;
+        }
+
+
+        .data-cont{
+            display: flex;
+            width: calc(100% - 10px);
+            height: calc(100% - 10px);
+            position: absolute;
+            display: flex;
+        }
+        .data-content{
+            /* z-index: 9999; */
+            margin: auto;
+        }
+
+        #canvas-bg{
+            z-index: -1;
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            filter: blur(20px);
+        }
+        
+        #embed-img{
+            max-width: 100%;
+            max-height: calc(100vh - 60px);
+        }
+
+
+
+        .card-container{
+            display: block;
+            /* position: absolute; */
+            margin: auto;
+            background-color: var(--bg-card);
+            padding: 15px;
+            padding-top: 1px;
+            border-radius: 5px;
+            height: auto;
+            width: 300px;
+            max-height: calc(100vh - 200px);
+            overflow-y: scroll;
+            overflow-x: hidden;
+        }
+
+        .card-content{
+        }
+        .card-center-conten{
+            display: flex;
+        }
+        .card-center-conten > *{
+            margin: auto;
+            text-align: center;
+        }
+        .card-header > *{
+            display: inline-block;
+        }
+        .card-header .ic-btn{
+            float: right;
+            margin: 20px;
+            margin-bottom: 0;
+            margin-left:   0;
+        }
+        .card-header .ic-close{
+            max-width: 20px;
+            max-height: 20px;
+            
+        }
+        .card-header .ic-close path{
+            fill: var(--color-opac);
+            stroke: var(--color-opac);
+        }
+
+
+        /* .card-content::-webkit-scrollbar-thumb{
+            background-color: #0d0d0d;
+        } */
+
+        .list{
+            list-style: none;
+            padding-left: 0;
+        }
+        .list-item{
+            margin: 10px 0;
+        }
+
+        .link{
+            /* color: var(--link-hover); */
+            /* color: var(--information); */
+        }
+        .link:hover{
+            color: var(--information);
+        }
+        .link-card{
+            background-color: var(--bg-opac);
+            padding: 10px 0px;
+            backdrop-filter: blur(50px);
+        }
+
+        button{
+            cursor: pointer;
+            border: none;
+            border-radius: 3px;
+            background-color: var(--btn-normal);
+            padding: 3px 10px;
+        }
+        button:hover{
+            background-color: var(--btn-hover);
+
+        }
+
+
+        /* icons */
+        @media all {
+
+            .ic-info{
+                max-width:  20px;
+                max-height: 20px;
+                vertical-align: sub;
+            }
+            .ic-help{
+                max-width: 30px;
+                max-height: 30px;
+            }
+            .ic-close{
+                max-width: 30px;
+                max-height: 30px;
+            }
+            .ic-arrow{
+                max-width: 30px;
+                max-height: 30px;
+            }
+
+            .ic path{
+                fill: var(--color-opac);
+                cursor: pointer;
+            }
+            .ic-btn{
+                display: inline-block;
+                cursor: pointer;
+            }
+        }
+
+
+
+        /* side arrows */
+        @media all {
+            .side-nav{
+                position: absolute;
+                display: flex;
+    
+            }
+            .side-nav:hover{
+                transform: scale(1.05);
+            }
+            .nav-right{
+                right: 1px;
+                height: 90%;
+    
+            }
+            .nav-right .ic-arrow{
+                margin: auto;
+            }
+            .nav-right .side-nav-btn-cont{
+                background: var(--bg-opac);
+                height: 200px;
+                min-height: 200px;
+                background: var(--bg-opac);
+                display: flex;
+                margin: auto;
+                cursor: pointer;
+                
+            }
+            .nav-right .ic-arrow path{
+                fill: none;
+                stroke: var(--color-opac);
+            }
+    
+    
+            .nav-left{
+                left: 0;
+                height: 90%;
+            }
+            
+            .nav-left .ic-arrow{
+                margin: auto;
+            }
+            .nav-left .side-nav-btn-cont{
+                background: var(--bg-opac);
+                height: 200px;
+                min-height: 200px;
+                background: var(--bg-opac);
+                display: flex;
+                margin: auto;
+                cursor: pointer;
+            }
+
+            .nav-left .ic-arrow path{
+                fill: none;
+                stroke: var(--color-opac);
+            }
+            
+        }
+
+
+        .warning{
+            background-color: var(--danger-half);
+            border-radius: 5px;
+            padding: 2px 5px;
+            
+        }
+        #warning-header{
+            top: 0;
+            opacity: 0.7;
+            border-radius: 0;
+        }
+
+
+        .badge{
+            /* position: absolute; */
+            top: -7px;
+            color: red;
+            z-index: 999;
+            opacity: 1;
+            right: 0;
+            background: var(--danger-half);
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 70%;
+        }
+        #btn-history{
+            display: inline-block;
+        }
+        #btn-history .badge{
+            display: inline-block;
+        }
+
+    </style>
+
+
+    <!-- Vue components -->
+    <script>
+        Vue.component("info", {
+            template: `
+                <svg class="ic ic-info" width="105" height="105" viewBox="0 0 105 105" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M52.5 5C26.2665 5 5 26.2665 5 52.5C5 78.7335 26.2665 100 52.5 100C78.7335 100 100 78.7335 100 52.5C100 26.2665 78.7335 5 52.5 5ZM0 52.5C0 23.5051 23.5051 0 52.5 0C81.4949 0 105 23.5051 105 52.5C105 81.4949 81.4949 105 52.5 105C23.5051 105 0 81.4949 0 52.5Z" fill="black"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M52.5 37.5C54.1569 37.5 55.5 38.8431 55.5 40.5V80.5C55.5 82.1569 54.1569 83.5 52.5 83.5C50.8431 83.5 49.5 82.1569 49.5 80.5V40.5C49.5 38.8431 50.8431 37.5 52.5 37.5Z" fill="black"/>
+                <path d="M55.5 28.5C55.5 30.1569 54.1569 31.5 52.5 31.5C50.8431 31.5 49.5 30.1569 49.5 28.5C49.5 26.8431 50.8431 25.5 52.5 25.5C54.1569 25.5 55.5 26.8431 55.5 28.5Z" fill="black"/>
+                </svg>
+            `
+        })
+        Vue.component("help", {
+            template: `
+            <svg class="ic ic-help" width="106" height="106" viewBox="0 0 106 106" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M53 5.5C26.7665 5.5 5.5 26.7665 5.5 53C5.5 79.2335 26.7665 100.5 53 100.5C79.2335 100.5 100.5 79.2335 100.5 53C100.5 26.7665 79.2335 5.5 53 5.5ZM0.5 53C0.5 24.0051 24.0051 0.5 53 0.5C81.9949 0.5 105.5 24.0051 105.5 53C105.5 81.9949 81.9949 105.5 53 105.5C24.0051 105.5 0.5 81.9949 0.5 53Z" fill="black"/>
+            <path d="M51.8301 63.5859C50.0279 63.5859 48.5425 62.1034 48.7606 60.3145C48.9194 59.0114 49.1659 57.8987 49.5 56.9766C50.0859 55.3594 51.2812 53.5664 53.0859 51.5977L57.6914 46.8516C59.6602 44.625 60.6445 42.2344 60.6445 39.6797C60.6445 37.2188 60 35.2969 58.7109 33.9141C57.4219 32.5078 55.5469 31.8047 53.0859 31.8047C50.6953 31.8047 48.7734 32.4375 47.3203 33.7031C46.6691 34.2703 46.1638 34.9246 45.8044 35.666C45.0258 37.2721 43.6937 38.8008 41.9087 38.8008C40.1082 38.8008 38.6012 37.3075 39.0357 35.5602C39.6171 33.2224 40.8318 31.244 42.6797 29.625C45.3516 27.2812 48.8203 26.1094 53.0859 26.1094C57.5156 26.1094 60.9609 27.3047 63.4219 29.6953C65.9062 32.0625 67.1484 35.3203 67.1484 39.4688C67.1484 43.5703 65.25 47.6133 61.4531 51.5977L57.6211 55.3945C56.4661 56.6761 55.701 58.3368 55.3257 60.3767C55.0034 62.1282 53.611 63.5859 51.8301 63.5859ZM48.2695 74.7305C48.2695 73.6758 48.5859 72.7969 49.2188 72.0938C49.875 71.3672 50.8359 71.0039 52.1016 71.0039C53.3672 71.0039 54.3281 71.3672 54.9844 72.0938C55.6406 72.7969 55.9688 73.6758 55.9688 74.7305C55.9688 75.7852 55.6406 76.6641 54.9844 77.3672C54.3281 78.0469 53.3672 78.3867 52.1016 78.3867C50.8359 78.3867 49.875 78.0469 49.2188 77.3672C48.5859 76.6641 48.2695 75.7852 48.2695 74.7305Z" fill="black"/>
+            </svg>
+            `
+        })
+        Vue.component("close", {
+            template: `
+            <svg class="ic ic-close" width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M77.5 77.5L40 40L2.5 2.5M77.5 2.5L2.5 77.5" stroke="black" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            `
+        })
+        Vue.component("arrow", {
+            template: `
+            <svg class="ic ic-arrow" width="41" height="81" viewBox="0 0 41 81" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 3L36.9645 36.9645C38.9171 38.9171 38.9181 42.0819 36.9655 44.0345C20.951 60.049 3 78 3 78" stroke="black" stroke-width="5" stroke-linecap="round"/>
+            </svg>
+            `
+        })
+    </script>
+
+    <script>
+        chars = {
+            A : "abcdefghijklmnopqrstuvwxyz",
+            B : "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            C : "0123456789",
+            
+            // youtube only
+            // https://pt.wikipedia.org/wiki/Base64
+            // https://www.youtube.com/watch?v=gocwRvLhDf8
+            D : "_-",
+            b64: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-",
+        }
+    </script>
+</head>
+<body>
+    <div id="app" class="main-theme">
+
+        <!-- <div id="welcome" v-if="show.welcome_msg">
+            <h3>Disclaimer</h3>
+            <h4>Please read before using</h4>
+            <p>This site is intended for fun and as a advice, by generating random links of screenshots,
+                anything may come, this means you should understant that using it, sensitive and potentially unwanted data may appear
+                once in a while, please be careful and respect others privacy.
+            </p>
+            <p>
+                As an advice, always remember that by uploading an image in sites/apps like lightshot and imgur
+                despite not being shared, your image is public, if you use a simple piece of code like this can find it. 
+            </p>
+            <p>
+                And Plase, never share personal and sensetive information data trough image hosting plataforms
+            </p>
+        </div> -->
+
+
+        <div class="nav-cont">
+            <div class="nav">
+                <!-- 
+                <label for="auto">Re-generate when open</label>
+                <input type="checkbox" name="" id="auto" @change="clickgen = $event.target.checked">
+                -->
+                <!-- <label for="show-img" title="if available">Show image</label>
+                <input type="checkbox" name="" v-model="showImg" @change="show.img = $event.target.checked" id="show-img" >
+                 |                  -->
+
+            </div>
+
+        </div>
+        
+        <div class="data-cont">
+
+            <!-- service info -->
+            <div class="card-container" v-show="show.serviceInfo">
+                <div class="card-header">
+                    <h4>Service info</h4>
+                    <div class="ic-btn" @click="show.serviceInfo = !show.serviceInfo">
+                        <close ></close>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <p class="warning">Warning: <br> {{sselect.description.warning || "[No comment available]"}}</p>
+                    <p>Name: <br>{{sselect.name}} {{sselect.name_extend}} </p>
+                    <p>type: <br>{{sselect.type}} {{sselect.type}} </p>
+                    <p>avaliability rate: <br>{{sselect.avaliabilityrate}}/10</p>
+                    <p>Description: <br> {{sselect.description.site}}</p>
+                    <p>Comment: <br> {{sselect.description.other || "[No comment available]"}}</p>
+                    <p>
+                        URLs:
+                        <br> <b>site:</b> <a :href="sselect.url.site">{{sselect.url.site}}</a>
+                        <br> <b>img:</b> <a :href="sselect.url.img">{{sselect.url.img}}</a>
+                    </p>
+
+                </div>
+            </div>
+
+            <!-- history -->
+            <div class="card-container" v-if="historyEnable" v-show="show.history">
+                <div class="card-header">
+                    <h4>history ({{history.length}})</h4> <button @click="history = []">clear</button>
+                    <div class="ic-btn" @click="show.history = !show.history">
+                        <close></close>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <ul class="list">
+                        <li class="list-item" v-for="(item, i) in history"><a class="link" :href="item.normalized">{{item.normalized}}</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- img container -->
+            <div class="data-content" v-show="!(show.serviceInfo || show.history || show.welcome_msg)">
+
+                <img
+                    :src="generated.url"
+                    @click="show.img = !show.img"
+                    v-show="show.img && sselect.canEmbed && sselect.type == 'image'"
+                    id="embed-img"
+                    alt="Image from random link"
+                    title="Image from random link, click to show/hide"
+                >
+
+                <div v-show="!show.img || sselect.type != 'image'" class="card-container link-card">
+                    <div class="card-center-conten">
+                        <a class="link" target="_blank" :href="this.generated.normalized" target="_blank" id="link">{{this.generated.normalized}}</a>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="data-content card-container" id="disclaimer" v-show="show.welcome_msg">
+                <div class="card-header">
+                    <h4>Terms of Service</h4>
+                    <div class="ic-btn" @click="show.welcome_msg = !show.welcome_msg">
+                        <close ></close>
+                    </div>
+                </div>
+                <p>
+                    By using this website you agree to be the sole and total responsible for the content/links you see,
+                    follow and what you do with it.
+                </p>
+                <p>
+                    Also and understand that the pourpose of this website is generate
+                    random links of videos, sites, images, etc; for fun and <b>we do not control it</b>, that means,
+                    content that is <b>unsafe, sensetive or and/or Not Safe For Work (NSFW)</b> may appear.
+                </p>
+                <p>
+                    Content from generated URLs may not be available. 
+                </p>
+
+                <p>LICENSE: <a href="">MIT</a></p>
+                
+                <p>
+                    <a href=""></a>
+                </p>
+
+            </div>
+
+            <canvas id="canvas-bg"></canvas>
+        </div>
+
+
+        <!-- Arrows -->
+        <div @click="prev" class="side-nav nav-left" >
+            <div class="side-nav-btn-cont">
+                <arrow style="transform: rotate(-180deg);"></arrow>
+
+            </div>
+        </div>
+        <div @click="next" class="side-nav nav-right">
+            <div class="side-nav-btn-cont">
+                <arrow ></arrow>
+
+            </div>
+        </div>
+        
+
+        <div v-show="sselect.description.warning != ''" class="nav-cont bottom-nav warning" id="warning-header">
+            <div class="nav">
+                {{sselect.description.warning}}
+            </div>
+        </div>
+        <div class="nav-cont bottom-nav" id="controls">
+            <div class="nav">
+                <select name="service" id="service" @change="sselect = services[$event.target.value]">
+                    <option v-for="(s, i) in services" :value="s.name" :selected="sselect.name == s.name">{{s.name}}{{s.name_extend}}</option>
+                </select>
+                <div @click="show.serviceInfo = !show.serviceInfo" class="ic-btn">
+                    <info></info>
+                </div>
+            </div>
+            <div class="nav">
+                <button id="btn-prev" @click="prev" :disabled="currentIndex-1 == 0">Prev</button>
+                <button id="btn-history" @click="show.history = !show.history" v-if="historyEnable">
+                    history
+                    <div class="badge">{{history.length}}</div>
+                </button>
+                <button id="btn-showImg" @click="show.img = !show.img" title="show/hide image">{{show.img ? "hide" : "show"}}</button>
+                
+                <button id="btn-next" @click="next">Next</button>
+            </div>
+            <div class="nav" id="sc-link">
+                <a class="link" target="_blank" :href="this.generated.normalized" target="_blank" id="link">{{this.generated.normalized}}</a>
+            </div>
+        </div>
+        
+
+        <!-- <h3>history <button id="history-clear" @click="history = []">clear</button></h3> 
+        <ul id="history">
+            <li v-for="h in history"><a :href="h">{{h}}</a></li>
+        </ul> -->
+    </div>
+
+    <script>
+
+        let services = {
+            "youtube.com":{
+                name: "youtube.com",
+                charkit: "ABCD",
+                name_extend: "",
+                type: "video",
+                idlength: 11,
+                genMode: "b64",
+                canEmbed: false,
+                avaliabilityrate: 0,
+                description: {
+                    warning: "",
+                    site: "Youtube",
+                    other: `YouTube used a random number encoded as Base64 (A-Z, a-z, 0-9, _-), may not work.
+                    Learn more here:
+                    https://pt.wikipedia.org/wiki/Base64
+                    https://www.youtube.com/watch?v=gocwRvLhDf8 (Tomm Scott video)`
+                },
+                url: {
+                    home: "https://youtube.com/",
+                    img: "https://youtube.com/watch?v=:id",
+                }
+            },
+            "postimage.org":{
+                name: "postimage.org",
+                name_extend: "",
+                type: "image",
+                charkit: "ABC",
+                genMode: "simple",
+                idlength: 8,
+                canEmbed: false,
+                avaliabilityrate: 0,
+                description: {
+                    warning: "",
+                    site: "Host your images for free",
+                    other: "some expire options"
+                },
+                url: {
+                    home: "https://postimages.org/",
+                    img: "https://postimg.cc/:id",
+                }
+            },
+            "imgbox.com":{
+                name: "imgbox.com",
+                name_extend: "",
+                type: "image",
+                charkit: "ABC",
+                genMode: "simple",
+                idlength: 8,
+                canEmbed: false,
+                avaliabilityrate: 0,
+                description:{
+                    warning: "",
+                    site: "fast, simple image host",
+                    other: ""
+                },
+                url:{
+                    site:"https://imgbox.com/",
+                    img:"https://imgbox.com/:id"
+                },
+
+            },
+            "imgbb.com":{
+                name:"imgbb.com",
+                name_extend: "",
+                type: "image",
+                charkit: "ABC",
+                genMode: "simple",
+                idlength: 7,
+                canEmbed: false,
+                avaliabilityrate: 0,
+                description:{
+                    warning: "",
+                    site:"Upload and share your images",
+                    other:"multiple expire options"
+                },
+                url:{
+                    site:"https://ibb.co/",
+                    img:"https://ibb.co/:id"
+                }
+            },
+            "imgur.com":{
+                name:"imgur.com",
+                name_extend: "",
+                type: "image",
+                charkit: "ABC",
+                genMode: "b64",
+                idlength: 7,
+                canEmbed: true,
+                avaliabilityrate: 3,
+                description:{
+                    warning: `Some images might contain sensetive or NSFW content`,
+                    site:"The magic of internet",
+                    other:"probably the most famous one..."
+                },
+                url:{
+                    site:"https://imgur.com/",
+                    img:"https://i.imgur.com/:id.jpeg"
+                }
+            },
+            "prnt.sc":{
+                name:"prnt.sc",
+                name_extend: "(Lightshot)",
+                type: "image",
+                charkit: "ABC",
+                genMode: "simple",
+                idlength: 6,
+                canEmbed: true,
+                avaliabilityrate: 8,
+                description:{
+                    warning: `Some images might contain sensetive or NSFW content`,
+                    site:"Screenshot tool for Mac & Win",
+                    other:""
+                },
+                url:{
+                    site:"https://prnt.sc/",
+                    img:"https://prnt.sc/:id/direct"
+                }
+            },
+            "bit.ly":{
+                name:"bit.ly",
+                name_extend: "(Url shortner)",
+                type: "link",
+                charkit: "ABC",
+                genMode: "simple",
+                idlength: 6,
+                canEmbed: false,
+                avaliabilityrate: 5,
+                description:{
+                    warning: `These links might have bit.ly's tracking on URLs or may lead to danger/unsafe places,
+                    please DON'T proceed if your browser say its unsafe.`,
+                    site:"Short URLs and custom free link shortner",
+                    other:""
+                },
+                url:{
+                    site:"https://bitly.com/",
+                    img:"https://bit.ly/:id"
+                }
+            },
+            // template
+            // "":{
+            //     name:"",
+            //     description:{
+            //         site:"",
+            //         other:""
+            //     },
+            //     url:{
+            //         site:"",
+            //         img:""
+            //     }
+            // },
+
+        }
+
+        // let imgel = document.getElementById("embed-img");
+        let canvas = document.getElementById("canvas-bg");
+        let ctx = canvas.getContext("2d");
+
+        
+        const app = new Vue({
+            el: "#app",
+            data:{
+                show:{
+                    welcome_msg: true,
+                    history: false,
+                    img: true,
+                    serviceInfo: false
+                },
+                historyEnable: true,
+
+                currentIndex: 0,
+
+                clickgen: false,
+                showImg: true,
+                services: services,
+                sselect: services["prnt.sc"],
+                // generated: {
+                //     url: "",
+                //     img: ""
+                // },
+                history: [],
+
+                canvas:{
+                    el: undefined,
+                    ctx: undefined
+                },
+
+                
+            },
+            created(){
+                this.next();
+                this.redraw()
+
+            },
+            computed:{
+                generated(){
+                    return this.history[this.currentIndex]
+                }
+            },
+            methods:{
+                next(){
+                    
+                    if(this.currentIndex+1 >= this.history.length){
+                        let service = this.sselect;
+
+                        let id = "";
+                        
+                        if(service.genMode == "charkit"){
+                            let charkit = service.charkit.split("");
+                            let charset = "";
+                            for (let i = 0; i < charkit.length; i++) {
+                                charset += chars[charkit[i]];
+                            }
+                            
+                            for (let i = 0; i <= service.idlength; i++) {
+                                id += charset.charAt(Math.random() * charset.length);
+                            }
+                        }
+                        else if(service.genMode == "b64"){
+                            for (let i = 0; i <= service.idlength; i++) {
+                                id += chars["b64"].charAt(Math.random() * 63)                                
+                            }
+                        }
+                        else if(service.genMode == "simple"){
+                            id = (Math.random()+1).toString(36).slice(2, service.idlength + 2);
+                        }
+                        // console.log(id);
+
+                        // let r = (Math.random()+1).toString(36).substr(6);
+                        // let r = (Math.random()+1).toString(36).slice(2, service.idlength + 2);
+                        let url = service.url.img.replace(":id", id);
+    
+                        let generated = {
+                            url,
+                            normalized: url.replace('/direct', '')
+                        }
+                        this.currentIndex = this.history.push(generated)-1;
+                        this.redraw()
+
+                    }else{
+
+                        this.currentIndex++;
+                        // console.log(this.currentIndex, this.history.length, this.history[++this.currentIndex]);
+                        // this.generated = this.history[this.currentIndex+1];
+                        // this.currentIndex++;
+                        this.redraw()
+                    }
+
+                },
+                
+                redraw(){
+
+                    try {
+                        // ctx.drawImage(imgel, el.width/2, el.height/2, imgel.imageWidth,imgel.imageheight)
+                        let can = document.getElementById("canvas-bg");
+                        let ctx = can.getContext("2d");
+                        ctx.drawImage(document.getElementById("embed-img"), 0, 0, can.width, can.height);
+    
+                        setTimeout(() => {
+                            window.requestAnimationFrame(this.redraw)
+                        }, 500);
+                        
+                    } catch (error) {
+                        
+                    }
+                },
+
+                prev(){
+                    if(this.currentIndex-1 > 0){
+                        this.currentIndex--;
+                        // this.generated = this.history[--this.currentIndex]
+                        // console.log("prev");
+                    }
+                }
+
+            }
+        })
+
+        // let btn = document.getElementById("gen");
+        // let lnk = document.getElementById("link");
+        // let history = document.getElementById("history");
+        // let auto = document.getElementById("auto");
+        // let showImg = document.getElementById("show-img");
+        // const base_url = "https://prnt.sc/:id"
+        // let imgel = document.getElementById("embed-img");
+
+        // let clearbtn = document.getElementById("history-clear");
+        // clearbtn.addEventListener("click", e => {
+        //     history.querySelectorAll("li").forEach(element => {
+        //         element.remove();
+        //     });
+        // })
+        // // const base_url = "https://i.imgur.com/:id.png"
+        // lnk.addEventListener("click", e => {
+        //     if(auto.checked) gen()
+        // })
+
+        // function gen(){
+        //     let r = (Math.random()+1).toString(36).substr(6);
+        //     let url = base_url.replace(":id", r);
+        //     lnk.href = url;
+        //     lnk.innerText = url;
+        //     let li = document.createElement("li");
+        //     li.innerHTML = `<a href="${url}" target="_blank" id="link">${url}</a>`;
+        //     history.appendChild(li);
+
+        //     if(showImg.checked){
+        //         imgel.src = `${url}/direct`
+        //     }
+
+
+        // }
+
+        // btn.addEventListener("click", e => {
+        //     gen()
+        // })
+
+        // gen()
+
+    </script>
+</body>
+</html>
